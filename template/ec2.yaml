@@ -33,12 +33,15 @@ Resources:
     Type: AWS::EC2::Instance
 
     Properties:
-      AvailabilityZone: us-east-1a
+
       ImageId: ami-0cca150d127c2216f
       InstanceType: t3.micro
 
-      SecurityGroupIds:
-        - !Ref EC2SecurityGroup
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: "0"
+          GroupSet:
+            - !Ref EC2SecurityGroup
 
       UserData:
         Fn::Base64: |
@@ -46,57 +49,72 @@ Resources:
 
           yum update -y
 
-          # Instalar nginx
+          # Instalar nginx y herramientas
           yum install -y nginx git docker htop tree
 
           # Iniciar nginx
           systemctl enable nginx
           systemctl start nginx
 
-          # Página HTML bonita
+          # Crear página web
           cat > /usr/share/nginx/html/index.html << 'EOF'
           <!DOCTYPE html>
-          <html>
+          <html lang="es">
+
           <head>
-            <title>EC2 GitHub Actions</title>
+
+            <meta charset="UTF-8">
+
+            <title>EC2 Web Server</title>
 
             <style>
-              body{
-                background:#0f172a;
-                color:white;
-                font-family:Arial;
-                text-align:center;
-                padding-top:100px;
+
+              body {
+                background: #0f172a;
+                color: #ffffff;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                text-align: center;
+                padding-top: 80px;
               }
 
-              h1{
-                font-size:60px;
-                color:#38bdf8;
+              .container {
+                background: #1e293b;
+                width: 700px;
+                margin: auto;
+                padding: 50px;
+                border-radius: 20px;
+                box-shadow: 0 0 40px rgba(0,0,0,0.7);
               }
 
-              p{
-                font-size:24px;
+              h1 {
+                font-size: 50px;
+                color: #38bdf8;
+                margin-bottom: 20px;
               }
 
-              .box{
-                background:#1e293b;
-                width:700px;
-                margin:auto;
-                padding:40px;
-                border-radius:20px;
-                box-shadow:0 0 30px rgba(0,0,0,.5);
+              p {
+                font-size: 20px;
+                line-height: 1.6;
+                margin: 10px 0;
               }
+
+              h2 {
+                color: #facc15;
+                margin-top: 30px;
+              }
+
             </style>
 
           </head>
 
           <body>
 
-            <div class="box">
+            <div class="container">
+
               <h1>🚀 EC2 DEPLOYADA</h1>
 
               <p>
-                Servidor creado desde GitHub Actions
+                Servidor creado desde <strong>GitHub Actions</strong>
               </p>
 
               <p>
@@ -104,9 +122,11 @@ Resources:
               </p>
 
               <h2>🔥 AWS DEVOPS MODE 🔥</h2>
+
             </div>
 
           </body>
+
           </html>
           EOF
 
