@@ -1,3 +1,4 @@
+```yaml
 AWSTemplateFormatVersion: '2010-09-09'
 Description: EC2 Web Server desde GitHub Actions
 
@@ -10,7 +11,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
 
     Properties:
-      GroupDescription: Permitir HTTP y SSH
+      GroupDescription: Permitir SSH y HTTP
 
       SecurityGroupIngress:
 
@@ -27,15 +28,15 @@ Resources:
           CidrIp: 0.0.0.0/0
 
   # ==========================================
-  # EC2
+  # EC2 INSTANCE
   # ==========================================
   MyEC2:
     Type: AWS::EC2::Instance
 
     Properties:
 
-      ImageId: ami-0cca150d127c2216f
-      InstanceType: t3.micro
+      ImageId: ami-0c101f26f147fa7fd
+      InstanceType: t2.micro
 
       NetworkInterfaces:
         - AssociatePublicIpAddress: true
@@ -49,15 +50,12 @@ Resources:
 
           yum update -y
 
-          # Instalar nginx y herramientas
-          yum install -y nginx git docker htop tree
+          amazon-linux-extras install nginx1 -y || yum install -y nginx
 
-          # Iniciar nginx
           systemctl enable nginx
           systemctl start nginx
 
-          # Crear página web
-          cat > /usr/share/nginx/html/index.html << 'EOF'
+          cat > /usr/share/nginx/html/index.html <<EOF
           <!DOCTYPE html>
           <html lang="es">
 
@@ -65,42 +63,38 @@ Resources:
 
             <meta charset="UTF-8">
 
-            <title>EC2 Web Server</title>
+            <title>AWS EC2</title>
 
             <style>
 
               body {
                 background: #0f172a;
-                color: #ffffff;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                color: white;
+                font-family: Arial, sans-serif;
                 text-align: center;
-                padding-top: 80px;
+                padding-top: 100px;
               }
 
               .container {
-                background: #1e293b;
                 width: 700px;
                 margin: auto;
+                background: #1e293b;
                 padding: 50px;
                 border-radius: 20px;
-                box-shadow: 0 0 40px rgba(0,0,0,0.7);
+                box-shadow: 0px 0px 30px rgba(0,0,0,0.6);
               }
 
               h1 {
-                font-size: 50px;
+                font-size: 55px;
                 color: #38bdf8;
-                margin-bottom: 20px;
               }
 
               p {
-                font-size: 20px;
-                line-height: 1.6;
-                margin: 10px 0;
+                font-size: 24px;
               }
 
               h2 {
                 color: #facc15;
-                margin-top: 30px;
               }
 
             </style>
@@ -111,17 +105,17 @@ Resources:
 
             <div class="container">
 
-              <h1>🚀 EC2 DEPLOYADA</h1>
+              <h1>EC2 DEPLOYADA</h1>
 
               <p>
-                Servidor creado desde <strong>GitHub Actions</strong>
+                Servidor creado desde GitHub Actions
               </p>
 
               <p>
                 CloudFormation + UserData + NGINX
               </p>
 
-              <h2>🔥 AWS DEVOPS MODE 🔥</h2>
+              <h2>AWS DEVOPS MODE</h2>
 
             </div>
 
@@ -130,22 +124,7 @@ Resources:
           </html>
           EOF
 
-          # Banner terminal
-          cat > /etc/motd << 'EOF'
-
-          ███████╗ ██████╗██████╗
-          ██╔════╝██╔════╝╚════██╗
-          █████╗  ██║      █████╔╝
-          ██╔══╝  ██║     ██╔═══╝
-          ███████╗╚██████╗███████╗
-          ╚══════╝ ╚═════╝╚══════╝
-
-          🚀 EC2 creada desde GitHub Actions
-          🌐 NGINX instalado
-          🐳 Docker instalado
-
-          EOF
-
       Tags:
         - Key: Name
           Value: EC2-GitHubActions
+```
