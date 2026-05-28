@@ -27,7 +27,7 @@ Resources:
           CidrIp: 0.0.0.0/0
 
   # ==========================================
-  # EC2
+  # EC2 INSTANCE
   # ==========================================
   MyEC2:
     Type: AWS::EC2::Instance
@@ -46,83 +46,275 @@ Resources:
 
           yum update -y
 
-          # Instalar nginx
+          # =====================================
+          # INSTALAR PAQUETES
+          # =====================================
           yum install -y nginx git docker htop tree
 
-          # Iniciar nginx
+          # =====================================
+          # INICIAR NGINX
+          # =====================================
           systemctl enable nginx
           systemctl start nginx
 
-          # Página HTML bonita
+          # =====================================
+          # CREAR PAGINA WEB
+          # =====================================
           cat > /usr/share/nginx/html/index.html << 'EOF'
+
           <!DOCTYPE html>
-          <html>
+          <html lang="es">
+
           <head>
-            <title>EC2 GitHub Actions</title>
+
+            <meta charset="UTF-8">
+
+            <meta name="viewport"
+                  content="width=device-width, initial-scale=1.0">
+
+            <title>AWS EC2 Deploy</title>
 
             <style>
+
+              *{
+                margin:0;
+                padding:0;
+                box-sizing:border-box;
+              }
+
               body{
-                background:#0f172a;
+                height:100vh;
+
+                display:flex;
+                justify-content:center;
+                align-items:center;
+
+                background:
+                  linear-gradient(
+                    135deg,
+                    #020617,
+                    #0f172a,
+                    #1e293b
+                  );
+
+                font-family:Arial, Helvetica, sans-serif;
                 color:white;
-                font-family:Arial;
+                overflow:hidden;
+              }
+
+              .background{
+                position:absolute;
+                width:100%;
+                height:100%;
+
+                background:
+                  radial-gradient(
+                    circle at top left,
+                    rgba(56,189,248,.25),
+                    transparent 30%
+                  ),
+                  radial-gradient(
+                    circle at bottom right,
+                    rgba(59,130,246,.20),
+                    transparent 30%
+                  );
+              }
+
+              .card{
+
+                position:relative;
+                z-index:10;
+
+                width:800px;
+                max-width:90%;
+
+                padding:60px;
+
+                border-radius:28px;
+
+                background:
+                  rgba(15,23,42,.75);
+
+                backdrop-filter:blur(12px);
+
+                border:1px solid rgba(255,255,255,.08);
+
+                box-shadow:
+                  0 0 50px rgba(0,0,0,.5);
+
                 text-align:center;
-                padding-top:100px;
+
+                animation:fadeIn 1.2s ease;
+              }
+
+              .badge{
+
+                display:inline-block;
+
+                padding:10px 20px;
+
+                margin-bottom:25px;
+
+                border-radius:999px;
+
+                background:#0ea5e9;
+
+                color:white;
+
+                font-size:14px;
+                font-weight:bold;
+                letter-spacing:1px;
+
+                box-shadow:
+                  0 0 20px rgba(14,165,233,.5);
               }
 
               h1{
-                font-size:60px;
+
+                font-size:64px;
+                margin-bottom:25px;
+
                 color:#38bdf8;
+
+                text-shadow:
+                  0 0 20px rgba(56,189,248,.5);
               }
 
-              p{
+              .subtitle{
+
                 font-size:24px;
+                color:#cbd5e1;
+
+                margin-bottom:18px;
               }
 
-              .box{
-                background:#1e293b;
-                width:700px;
-                margin:auto;
-                padding:40px;
-                border-radius:20px;
-                box-shadow:0 0 30px rgba(0,0,0,.5);
+              .tech{
+
+                margin-top:35px;
+
+                display:flex;
+                justify-content:center;
+                gap:15px;
+                flex-wrap:wrap;
               }
+
+              .tech span{
+
+                padding:12px 18px;
+
+                border-radius:14px;
+
+                background:#111827;
+
+                border:1px solid rgba(255,255,255,.08);
+
+                color:#93c5fd;
+
+                font-size:15px;
+              }
+
+              .footer{
+
+                margin-top:40px;
+
+                color:#64748b;
+                font-size:14px;
+              }
+
+              @keyframes fadeIn{
+
+                from{
+                  opacity:0;
+                  transform:translateY(30px);
+                }
+
+                to{
+                  opacity:1;
+                  transform:translateY(0);
+                }
+              }
+
+              @media(max-width:768px){
+
+                h1{
+                  font-size:42px;
+                }
+
+                .subtitle{
+                  font-size:18px;
+                }
+
+                .card{
+                  padding:40px 25px;
+                }
+              }
+
             </style>
 
           </head>
 
           <body>
 
-            <div class="box">
-              <h1>🚀 EC2 DEPLOYADA</h1>
+            <div class="background"></div>
 
-              <p>
-                Servidor creado desde GitHub Actions
+            <div class="card">
+
+              <div class="badge">
+                🚀 AWS CLOUD DEPLOY
+              </div>
+
+              <h1>
+                EC2 DEPLOYADA
+              </h1>
+
+              <p class="subtitle">
+                Servidor desplegado automáticamente
+                desde GitHub Actions
               </p>
 
-              <p>
-                CloudFormation + UserData + NGINX
+              <p class="subtitle">
+                CloudFormation + EC2 + NGINX + DevOps
               </p>
 
-              <h2>🔥 AWS DEVOPS MODE 🔥</h2>
+              <div class="tech">
+
+                <span>⚡ AWS</span>
+
+                <span>🐳 Docker</span>
+
+                <span>🌐 NGINX</span>
+
+                <span>🔧 GitHub Actions</span>
+
+              </div>
+
+              <div class="footer">
+                Proyecto DevOps desplegado correctamente
+              </div>
+
             </div>
 
           </body>
           </html>
+
           EOF
 
-          # Banner terminal
+          # =====================================
+          # BANNER TERMINAL
+          # =====================================
           cat > /etc/motd << 'EOF'
 
-          ███████╗ ██████╗██████╗
-          ██╔════╝██╔════╝╚════██╗
-          █████╗  ██║      █████╔╝
-          ██╔══╝  ██║     ██╔═══╝
-          ███████╗╚██████╗███████╗
-          ╚══════╝ ╚═════╝╚══════╝
+           █████╗ ██╗    ██╗███████╗
+          ██╔══██╗██║    ██║██╔════╝
+          ███████║██║ █╗ ██║███████╗
+          ██╔══██║██║███╗██║╚════██║
+          ██║  ██║╚███╔███╔╝███████║
+          ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝
 
-          🚀 EC2 creada desde GitHub Actions
-          🌐 NGINX instalado
+          🚀 EC2 desplegada correctamente
+          🌐 NGINX activo
           🐳 Docker instalado
+          🔥 GitHub Actions funcionando
 
           EOF
 
