@@ -1,28 +1,66 @@
-name: Deploy EC2
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EC2 con userdata decorativa
 
-on:
-  workflow_dispatch:
+Resources:
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      ImageId: ami-0abcdef1234567890 # Cambia por la AMI de tu región
+      KeyName: my-keypair           # Cambia por tu keypair
+      SecurityGroupIds:
+        - sg-0123456789abcdef0      # Cambia por tu SG
+      SubnetId: subnet-0123456789abcdef0 # Cambia por tu subnet
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          # =========================================================
+          #      AWS EC2 USERDATA - Linux Fancy Edition
+          # =========================================================
+          exec > >(tee /var/log/user-data.log|logger -t user-data ) 2>&1
+          echo "🚀 Iniciando configuración EC2..."
 
-jobs:
+          # Detectar distro
+          if [ -f /etc/os-release ]; then
+              . /etc/os-release
+              OS=$ID
+          fi
 
-  deploy:
+          # Actualizar sistema e instalar utilidades
+          if [[ "$OS" == "ubuntu" ]]; then
+              apt update -y
+              apt upgrade -y
+              apt install -y curl wget git unzip tree htop neofetch docker.io
+              systemctl enable docker
+              systemctl start docker
+          elif [[ "$OS" == "amzn" ]]; then
+              dnf update -y || yum update -y
+              dnf install -y curl wget git unzip tree htop docker tar
+              systemctl enable docker
+              systemctl start docker
+          fi
 
-    runs-on: ubuntu-latest
+          # Crear banner MOTD elegante
+          cat > /etc/motd << 'EOF'
+          ███████╗███████╗██████╗ ███████╗
+          ██╔════╝██╔════╝██╔══██╗██╔════╝
+          █████╗  █████╗  ██████╔╝█████╗
+          ██╔══╝  ██╔══╝  ██╔═══╝ ██╔══╝
+          ███████╗███████╗██║     ███████╗
+          EOF
 
-    steps:
+          # Colores bash y alias
+          cat >> /etc/bashrc << 'EOF'
+          export PS1="\[\e[1;32m\][\u@\h]\[\e[0m\] \[\e[1;34m\]\w\[\e[0m\] \$ "
+          alias ll='ls -lah --color=auto'
+          alias gs='git status'
+          alias dc='docker ps'
+          alias update-system='sudo dnf update -y || sudo apt update && sudo apt upgrade -y'
+          clear
+          neofetch 2>/dev/null
+          EOF
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+          mkdir -p /workspace
+          chmod 777 /workspace
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Deploy CloudFormation Stack
-        run: |
-          aws cloudformation deploy \
-          --template-file template/ec2.yaml \
-          --stack-name ec2-stack-clase
+          echo "✅ Configuración completada"
