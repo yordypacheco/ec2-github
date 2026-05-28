@@ -1,8 +1,34 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: EC2 creada desde GitHub Actions
+Description: EC2 Web Server desde GitHub Actions
 
 Resources:
 
+  # ==========================================
+  # SECURITY GROUP
+  # ==========================================
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+
+    Properties:
+      GroupDescription: Permitir HTTP y SSH
+
+      SecurityGroupIngress:
+
+        # SSH
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+        # HTTP
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  # ==========================================
+  # EC2
+  # ==========================================
   MyEC2:
     Type: AWS::EC2::Instance
 
@@ -11,21 +37,80 @@ Resources:
       ImageId: ami-0cca150d127c2216f
       InstanceType: t3.micro
 
+      SecurityGroupIds:
+        - !Ref EC2SecurityGroup
+
       UserData:
         Fn::Base64: |
           #!/bin/bash
 
           yum update -y
 
-          yum install -y \
-            git \
-            htop \
-            tree \
-            docker
+          # Instalar nginx
+          yum install -y nginx git docker htop tree
 
-          systemctl enable docker
-          systemctl start docker
+          # Iniciar nginx
+          systemctl enable nginx
+          systemctl start nginx
 
+          # Página HTML bonita
+          cat > /usr/share/nginx/html/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>EC2 GitHub Actions</title>
+
+            <style>
+              body{
+                background:#0f172a;
+                color:white;
+                font-family:Arial;
+                text-align:center;
+                padding-top:100px;
+              }
+
+              h1{
+                font-size:60px;
+                color:#38bdf8;
+              }
+
+              p{
+                font-size:24px;
+              }
+
+              .box{
+                background:#1e293b;
+                width:700px;
+                margin:auto;
+                padding:40px;
+                border-radius:20px;
+                box-shadow:0 0 30px rgba(0,0,0,.5);
+              }
+            </style>
+
+          </head>
+
+          <body>
+
+            <div class="box">
+              <h1>🚀 EC2 DEPLOYADA</h1>
+
+              <p>
+                Servidor creado desde GitHub Actions
+              </p>
+
+              <p>
+                CloudFormation + UserData + NGINX
+              </p>
+
+              <h2>🔥 AWS DEVOPS MODE 🔥</h2>
+            </div>
+
+          </body>
+          </html>
+          EOF
+
+          # Banner terminal
           cat > /etc/motd << 'EOF'
 
           ███████╗ ██████╗██████╗
@@ -36,14 +121,10 @@ Resources:
           ╚══════╝ ╚═════╝╚══════╝
 
           🚀 EC2 creada desde GitHub Actions
-          🐳 Docker Instalado
-          ⚡ UserData Ejecutada Correctamente
+          🌐 NGINX instalado
+          🐳 Docker instalado
 
           EOF
-
-          echo 'export PS1="\[\e[1;32m\][\u@\h]\[\e[0m\] \[\e[1;34m\]\w\[\e[0m\] \$ "' >> /etc/bashrc
-
-          mkdir /workspace
 
       Tags:
         - Key: Name
